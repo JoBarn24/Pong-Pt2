@@ -4,6 +4,7 @@ public class BallScript : MonoBehaviour
 {
     public float speed = 10f;
     public ParticleSystem hitEffect;
+    public AudioSource hitSound;
     
     private Rigidbody rb;
     
@@ -12,6 +13,7 @@ public class BallScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.linearVelocity = new Vector3(speed,0,0);
+        hitSound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -31,7 +33,7 @@ public class BallScript : MonoBehaviour
             {
                 hitEffect.Play();
             }
-            
+
             float paddleHeight = 4f;
             float factor = (transform.position.z - other.transform.position.z) / (paddleHeight/2);
 
@@ -41,10 +43,17 @@ public class BallScript : MonoBehaviour
             newDirection.z += factor * speed;
             
             float currentSpeed = rb.linearVelocity.magnitude;
-            float newSpeed = currentSpeed + 0.5f;
+            float newSpeed = currentSpeed * 1.3f;
             Debug.Log("Ball speed:" + newSpeed);
             
             rb.linearVelocity = newDirection.normalized * newSpeed;
+
+            if (newSpeed > 8f && !hitSound.isPlaying)
+            {
+                hitSound.pitch = 1f;
+                hitSound.volume = 1f;
+            }
+            hitSound.Play();
         }
         else if (other.gameObject.CompareTag("Wall"))
         {

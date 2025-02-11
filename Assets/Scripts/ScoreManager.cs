@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,15 @@ public class ScoreManager : MonoBehaviour
     public static int rightScore = 0;
     
     private bool gameOver = false;
+    private Color flashColor = Color.red;
+    private Color leftColor;
+    private Color rightColor;
+
+    void Start()
+    {
+        leftColor = leftText.color;
+        rightColor = rightText.color;
+    }
     
     private void OnTriggerEnter(Collider other)
     {
@@ -51,6 +61,7 @@ public class ScoreManager : MonoBehaviour
     {
         leftScore++;
         leftText.text = leftScore.ToString();
+        StartCoroutine(FlashScore(leftText, leftColor));
         CheckGameOver();
     }
 
@@ -58,6 +69,7 @@ public class ScoreManager : MonoBehaviour
     {
         rightScore++;
         rightText.text = rightScore.ToString();
+        StartCoroutine(FlashScore(rightText, rightColor));
         CheckGameOver();
     }
 
@@ -103,5 +115,12 @@ public class ScoreManager : MonoBehaviour
         
         Debug.Log("Game reset.");
         gameOver = false;
+    }
+
+    IEnumerator FlashScore(TextMeshProUGUI scoreText, Color defaultColor)
+    {
+        scoreText.color = flashColor;
+        yield return new WaitForSeconds(0.5f);
+        scoreText.color = defaultColor;
     }
 }
