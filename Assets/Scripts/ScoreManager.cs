@@ -11,6 +11,8 @@ public class ScoreManager : MonoBehaviour
     public GameObject ball;
     public static int leftScore = 0;
     public static int rightScore = 0;
+    public GameObject sizePowerUp;
+    //public GameObject powerUpSpeed;
     
     private bool gameOver = false;
     private Color flashColor = Color.red;
@@ -112,6 +114,16 @@ public class ScoreManager : MonoBehaviour
         
         BallScript ballScript = ball.GetComponent<BallScript>();
         ballScript.ResetBall("left");
+
+        if (sizePowerUp.activeSelf == false)
+        {
+            sizePowerUp.SetActive(true);
+        }
+        
+        //if (powerUpSpeed == null)
+        //{
+        //    Instantiate(powerUpSpeed);
+        //}
         
         Debug.Log("Game reset.");
         gameOver = false;

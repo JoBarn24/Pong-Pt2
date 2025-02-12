@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class BallScript : MonoBehaviour
@@ -7,6 +8,7 @@ public class BallScript : MonoBehaviour
     public AudioSource hitSound;
     
     private Rigidbody rb;
+    private GameObject lastHitPaddle;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -29,6 +31,8 @@ public class BallScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Paddle"))
         {
+            lastHitPaddle = other.gameObject;
+            
             if (hitEffect != null)
             {
                 hitEffect.Play();
@@ -60,6 +64,16 @@ public class BallScript : MonoBehaviour
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y, -rb.linearVelocity.z).normalized *
                                 rb.linearVelocity.magnitude;
         }
+        else if (other.gameObject.CompareTag("PowerUp"))
+        {
+            if (other.gameObject.name == "PaddleSize" && lastHitPaddle != null)
+            {
+                Vector3 currentScale = lastHitPaddle.transform.localScale;
+                lastHitPaddle.transform.localScale = new Vector3(currentScale.x, currentScale.y, 2f);
+                other.gameObject.SetActive(false);
+                StartCoroutine(ResetPaddleSize(lastHitPaddle));
+            }
+        }
     }
 
     public void ResetBall(string direction)
@@ -80,6 +94,16 @@ public class BallScript : MonoBehaviour
     {
         rb.linearVelocity = Vector3.zero;
         Debug.Log("Ball stopped.");
+    }
+
+    private IEnumerator ResetPaddleSize(GameObject paddle)
+    {
+        yield return new WaitForSeconds(10f);
+        
+        if (lastHitPaddle != null)
+        {
+            paddle.transform.localScale = new Vector3(1f, 1f, 1f);
+        }
     }
 }
 

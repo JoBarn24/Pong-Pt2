@@ -19,7 +19,9 @@ public class PaddleController : MonoBehaviour
         float move = Input.GetAxisRaw(inputAxis) * speed * Time.fixedDeltaTime;
         Vector3 newPosition = rb.position + new Vector3(0, 0, move);
 
-        newPosition.z = Mathf.Clamp(newPosition.z, lowerBoundary, upperBoundary);
+        float halfPaddleHeight = transform.localScale.z/2f;
+        //newPosition.z = Mathf.Clamp(newPosition.z, lowerBoundary, upperBoundary);
+        newPosition.z = Mathf.Clamp(newPosition.z, lowerBoundary + halfPaddleHeight, upperBoundary - halfPaddleHeight);
         rb.MovePosition(newPosition);
     }
 }
