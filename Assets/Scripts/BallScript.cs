@@ -5,7 +5,8 @@ public class BallScript : MonoBehaviour
 {
     public float speed = 10f;
     public ParticleSystem hitEffect;
-    public AudioSource hitSound;
+    public AudioSource hitSound1;
+    public AudioSource hitSound2;
     
     private Rigidbody rb;
     private GameObject lastHitPaddle;
@@ -15,7 +16,9 @@ public class BallScript : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.linearVelocity = new Vector3(speed,0,0);
-        hitSound = GetComponent<AudioSource>();
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        hitSound1 = audioSources[0];
+        hitSound2 = audioSources[1];
     }
 
     // Update is called once per frame
@@ -40,7 +43,8 @@ public class BallScript : MonoBehaviour
 
             float paddleHeight = 4f;
             float factor = (transform.position.z - other.transform.position.z) / (paddleHeight/2);
-
+            Debug.Log("Factor=" + factor);
+            
             Vector3 paddle = other.contacts[0].normal;
             Vector3 newDirection = Vector3.Reflect(rb.linearVelocity, paddle);
 
@@ -51,28 +55,22 @@ public class BallScript : MonoBehaviour
             Debug.Log("Ball speed:" + newSpeed);
             
             rb.linearVelocity = newDirection.normalized * newSpeed;
-
-            if (newSpeed > 8f && !hitSound.isPlaying)
+            
+            if (factor >= 0f)
             {
-                hitSound.pitch = 1f;
-                hitSound.volume = 1f;
+                hitSound1.Play();
+                Debug.Log("hitSound1");
             }
-            hitSound.Play();
+            else
+            {
+                hitSound2.Play();
+                Debug.Log("hitSound2");
+            }
         }
         else if (other.gameObject.CompareTag("Wall"))
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y, -rb.linearVelocity.z).normalized *
                                 rb.linearVelocity.magnitude;
-        }
-        else if (other.gameObject.CompareTag("PowerUp"))
-        {
-            if (other.gameObject.name == "PaddleSize" && lastHitPaddle != null)
-            {
-                Vector3 currentScale = lastHitPaddle.transform.localScale;
-                lastHitPaddle.transform.localScale = new Vector3(currentScale.x, currentScale.y, 2f);
-                other.gameObject.SetActive(false);
-                StartCoroutine(ResetPaddleSize(lastHitPaddle));
-            }
         }
     }
 
@@ -103,6 +101,32 @@ public class BallScript : MonoBehaviour
         if (lastHitPaddle != null)
         {
             paddle.transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+    }
+    
+    private IEnumerator ResetTime()
+    {
+        yield return new WaitForSeconds(10f);
+        Time.timeScale = 1f;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("PowerUp") && lastHitPaddle != null)
+        {
+            if (other.gameObject.name == "PaddleSize")
+            {
+                Vector3 currentScale = lastHitPaddle.transform.localScale;
+                lastHitPaddle.transform.localScale = new Vector3(currentScale.x, currentScale.y, 2f);
+                other.gameObject.SetActive(false);
+                StartCoroutine(ResetPaddleSize(lastHitPaddle));
+            }
+            else if (other.gameObject.name == "FastTime")
+            {
+                other.gameObject.SetActive(false);
+                Time.timeScale = 1.75f;
+                StartCoroutine(ResetTime());
+            }
         }
     }
 }
